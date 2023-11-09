@@ -1,0 +1,85 @@
+name: Publish Docker image
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.15
+        with:
+          versionSpec: 5.x
+
+      - name: Install CycloneDX
+        run: npm install --global @cyclonedx/cyclonedx-npm
+        shell: bash
+
+      # This step generates a Source Bill of Materials (SBOM) package that captures all the dependencies compiled
+      # into the application.
+      - name: Generate SBOM
+        run: cyclonedx-npm --ignore-npm-errors --output-file bom.json
+        shell: bash
+
+      - id: determine_version
+        name: Determine Version
+        uses: gittools/actions/gitversion/execute@v0.9.15
+        with:
+          additionalArguments: /overrideconfig mode=Mainline
+
+      - name: Install Octopus Deploy CLI
+        uses: OctopusDeploy/install-octopus-cli-action@v1
+        with:
+          version: latest
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          # To log into a third party registry, set the registry key below.
+
+          # This is the GitHub Container Registry
+          #registry: ghcr.io
+
+          # This is GitLab
+          #registry: registry.gitlab.com
+
+          # This is the Azure Container Registry
+          #registry: <registry-name>.azurecr.io
+
+          # This is the Google Container Registry
+          #registry: gcr.io
+
+          # These credentials assume existing secrets for DockerHub
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          # Change this to "true" when you are sure the tag is unique. It is set to false
+          # to ensure that existing images are not overwritten unintentionally.
+          push: false
+          tags: jchatmas/new-name:${{ steps.determine_version.outputs.semVer }}
+
+      - name: Create Octopus Release
+        # When the image is being pushed, remove this if property to have the workflow create
+        # a new release in Octopus. Creating a release without a valid image will fail,
+        # so the image must be pushed first.
+        if: ${{ false }}
+        uses: OctopusDeploy/create-release-action@v3
+        env:
+          OCTOPUS_API_KEY: "${{ secrets.OCTOPUS_API_TOKEN }}"
+          OCTOPUS_URL: "https://demo.octopus.app"
+          OCTOPUS_SPACE: "Trading Team"
+        with:
+          project: "New Name"
