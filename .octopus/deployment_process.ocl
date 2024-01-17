@@ -1,0 +1,197 @@
+step "deploy-container" {
+    name = "Deploy Container"
+    properties = {
+        Octopus.Action.TargetRoles = "EKS_Reference_Cluster"
+    }
+
+    action {
+        action_type = "Octopus.KubernetesDeployContainers"
+        environments = ["development", "test", "production"]
+        properties = {
+            Octopus.Action.EnabledFeatures = "Octopus.Features.KubernetesService,Octopus.Features.KubernetesIngress,Octopus.Features.KubernetesConfigMap,Octopus.Features.KubernetesSecret"
+            Octopus.Action.Kubernetes.DeploymentTimeout = "180"
+            Octopus.Action.Kubernetes.ResourceStatusCheck = "True"
+            Octopus.Action.KubernetesContainers.Containers = "[{\"Args\":[],\"Command\":[],\"ConfigMapEnvFromSource\":[],\"ConfigMapEnvironmentVariables\":[],\"CreateFeedSecrets\":\"False\",\"EnvironmentVariables\":[{\"key\":\"PORT\",\"keyError\":null,\"option\":\"\",\"option2\":\"\",\"option2Error\":null,\"optionError\":null,\"value\":\"#{Kubernetes.Deployment.Port}\",\"valueError\":null},{\"key\":\"UDL_SETVALUE_1\",\"keyError\":null,\"option\":\"\",\"option2\":\"\",\"option2Error\":null,\"optionError\":null,\"value\":\"[/usr/share/nginx/html/config.json][productEndpoint]/#{Octopus.Action.Kubernetes.Namespace}/api/products\",\"valueError\":null},{\"key\":\"UDL_SETVALUE_2\",\"keyError\":null,\"option\":\"\",\"option2\":\"\",\"option2Error\":null,\"optionError\":null,\"value\":\"[/usr/share/nginx/html/config.json][productHealthEndpoint]/#{Octopus.Action.Kubernetes.Namespace}/health/products\",\"valueError\":null},{\"key\":\"UDL_SETVALUE_3\",\"keyError\":null,\"option\":\"\",\"option2\":\"\",\"option2Error\":null,\"optionError\":null,\"value\":\"[/usr/share/nginx/html/config.json][auditEndpoint]/#{Octopus.Action.Kubernetes.Namespace}/api/audits\",\"valueError\":null},{\"key\":\"UDL_SETVALUE_4\",\"keyError\":null,\"option\":\"\",\"option2\":\"\",\"option2Error\":null,\"optionError\":null,\"value\":\"[/usr/share/nginx/html/config.json][auditHealthEndpoint]/#{Octopus.Action.Kubernetes.Namespace}/health/audits\",\"valueError\":null}],\"FieldRefEnvironmentVariables\":[],\"Lifecycle\":{\"PostStart\":null,\"PreStop\":null},\"LivenessProbe\":{\"exec\":{\"command\":[]},\"failureThreshold\":\"\",\"httpGet\":{\"host\":\"\",\"httpHeaders\":[],\"path\":\"\",\"port\":\"\",\"scheme\":\"\"},\"initialDelaySeconds\":\"\",\"periodSeconds\":\"\",\"successThreshold\":\"\",\"tcpSocket\":{\"host\":\"\",\"port\":\"\"},\"timeoutSeconds\":\"\",\"type\":\"\"},\"Name\":\"web\",\"Ports\":[{\"key\":\"web\",\"keyError\":null,\"option\":\"TCP\",\"option2\":\"\",\"option2Error\":null,\"optionError\":null,\"value\":\"#{Kubernetes.Deployment.Port}\",\"valueError\":null}],\"ReadinessProbe\":{\"exec\":{\"command\":[]},\"failureThreshold\":\"\",\"httpGet\":{\"host\":\"\",\"httpHeaders\":[],\"path\":\"\",\"port\":\"\",\"scheme\":\"\"},\"initialDelaySeconds\":\"\",\"periodSeconds\":\"\",\"successThreshold\":\"\",\"tcpSocket\":{\"host\":\"\",\"port\":\"\"},\"timeoutSeconds\":\"\",\"type\":\"\"},\"Resources\":{\"limits\":{\"amdGpu\":\"\",\"cpu\":\"\",\"ephemeralStorage\":\"\",\"memory\":\"\",\"nvidiaGpu\":\"\",\"storage\":\"\"},\"requests\":{\"amdGpu\":\"\",\"cpu\":\"\",\"ephemeralStorage\":\"\",\"memory\":\"\",\"nvidiaGpu\":\"\",\"storage\":\"\"}},\"SecretEnvFromSource\":[],\"SecretEnvironmentVariables\":[],\"SecurityContext\":{\"allowPrivilegeEscalation\":\"\",\"capabilities\":{\"add\":[],\"drop\":[\"ALL\"]},\"privileged\":\"\",\"readOnlyRootFilesystem\":\"\",\"runAsGroup\":\"\",\"runAsNonRoot\":\"True\",\"runAsUser\":\"\",\"seLinuxOptions\":{\"level\":\"\",\"role\":\"\",\"type\":\"\",\"user\":\"\"}},\"StartupProbe\":{\"exec\":{\"command\":[]},\"failureThreshold\":\"\",\"httpGet\":{\"host\":\"\",\"httpHeaders\":[],\"path\":\"\",\"port\":\"\",\"scheme\":\"\"},\"initialDelaySeconds\":\"\",\"periodSeconds\":\"\",\"successThreshold\":\"\",\"tcpSocket\":{\"host\":\"\",\"port\":\"\"},\"timeoutSeconds\":\"\",\"type\":\"\"},\"TerminationMessagePath\":\"\",\"TerminationMessagePolicy\":\"\",\"VolumeMounts\":[]}]"
+            Octopus.Action.KubernetesContainers.DeploymentName = "#{Kubernetes.Deployment.Name}"
+            Octopus.Action.KubernetesContainers.DeploymentResourceType = "Deployment"
+            Octopus.Action.KubernetesContainers.DeploymentStyle = "RollingUpdate"
+            Octopus.Action.KubernetesContainers.IngressAnnotations = "[{\"key\":\"nginx.ingress.kubernetes.io/rewrite-target\",\"keyError\":null,\"option\":\"\",\"option2\":\"\",\"option2Error\":null,\"optionError\":null,\"value\":\"$1\",\"valueError\":null},{\"key\":\"nginx.ingress.kubernetes.io/use-regex\",\"keyError\":null,\"option\":\"\",\"option2\":\"\",\"option2Error\":null,\"optionError\":null,\"value\":\"true\",\"valueError\":null}]"
+            Octopus.Action.KubernetesContainers.IngressClassName = "nginx"
+            Octopus.Action.KubernetesContainers.IngressName = "#{Kubernetes.Ingress.Name}"
+            Octopus.Action.KubernetesContainers.IngressRules = "[{\"host\":\"\",\"http\":{\"paths\":[{\"key\":\"#{Kubernetes.Ingress.Path}\",\"option\":\"\",\"option2\":\"ImplementationSpecific\",\"value\":\"web\"}]}}]"
+            Octopus.Action.KubernetesContainers.PodManagementPolicy = "OrderedReady"
+            Octopus.Action.KubernetesContainers.Replicas = "1"
+            Octopus.Action.KubernetesContainers.ServiceName = "#{Kubernetes.Service.Name}"
+            Octopus.Action.KubernetesContainers.ServiceNameType = "External"
+            Octopus.Action.KubernetesContainers.ServicePorts = "[{\"name\":\"web\",\"nodePort\":\"\",\"port\":\"80\",\"protocol\":\"TCP\",\"targetPort\":\"web\"}]"
+            Octopus.Action.KubernetesContainers.ServiceType = "ClusterIP"
+            Octopus.Action.RunOnServer = "true"
+            OctopusUseBundledTooling = "False"
+        }
+        worker_pool = "hosted-ubuntu"
+
+        container {
+            feed = "docker-hub"
+            image = "octopuslabs/k8s-workertools"
+        }
+
+        packages "web" {
+            acquisition_location = "NotAcquired"
+            feed = "#{Kubernetes.Deployment.Feed}"
+            package_id = "#{Kubernetes.Deployment.Image}"
+            properties = {
+                Extract = "False"
+                PackageParameterName = ""
+                SelectionMode = "immediate"
+            }
+        }
+    }
+}
+
+step "smoke-test" {
+    name = "Smoke Test"
+    properties = {
+        Octopus.Action.TargetRoles = "EKS_Reference_Cluster"
+    }
+
+    action {
+        action_type = "Octopus.KubernetesRunScript"
+        environments = ["development", "test", "production"]
+        properties = {
+            Octopus.Action.RunOnServer = "true"
+            Octopus.Action.Script.ScriptBody = <<-EOT
+                for i in {1..30}
+                do
+                	HOSTNAME=$(kubectl get ingress #{Kubernetes.Ingress.Name} -o json -n development | jq -r '.status.loadBalancer.ingress[0].hostname')
+                    if [[ -n "${HOSTNAME}" ]]
+                  	then
+                    	break
+                  	fi
+                  	echo "Waiting for ingress hostname"
+                  	sleep 10
+                done
+                    
+                
+                # Load balancers can take a minute or so before their DNS is propagated.
+                # A status code of 000 means curl could not resolve the DNS name, so we wait for a bit until DNS is updated.
+                echo "Testing http://${HOSTNAME}#{Kubernetes.App.HealthCheck}"
+                echo "Waiting for DNS to propagate. This can take a while for a new load balancer."
+                for i in {1..30}
+                do
+                  CODE=$(curl -o /dev/null -s -w "%{http_code}\n" http://${HOSTNAME}#{Kubernetes.App.HealthCheck})
+                  if [[ "${CODE}" == "200" ]]
+                  then
+                    break
+                  fi
+                  echo "Waiting for DNS name to be resolvable and for service to respond"
+                  sleep 10
+                done
+                
+                echo "response code: ${CODE}"
+                if [[ "${CODE}" == "200" ]]
+                then
+                    echo "success"
+                    exit 0
+                else
+                    echo "error"
+                    exit 1
+                fi
+                EOT
+            Octopus.Action.Script.ScriptSource = "Inline"
+            Octopus.Action.Script.Syntax = "Bash"
+            OctopusUseBundledTooling = "False"
+        }
+        worker_pool = "hosted-ubuntu"
+
+        container {
+            feed = "docker-hub"
+            image = "octopuslabs/k8s-workertools"
+        }
+    }
+}
+
+step "security-scan" {
+    name = "Security Scan"
+
+    action {
+        action_type = "Octopus.Script"
+        properties = {
+            Octopus.Action.RunOnServer = "true"
+            Octopus.Action.Script.ScriptBody = <<-EOT
+                echo "Pulling Trivy Docker Image"
+                echo "##octopus[stdout-verbose]"
+                docker pull aquasec/trivy
+                echo "##octopus[stdout-default]"
+                  
+                echo "Installing umoci"
+                echo "##octopus[stdout-verbose]"
+                # Install umoci
+                if ! which umoci
+                then
+                  curl -o umoci -L https://github.com/opencontainers/umoci/releases/latest/download/umoci.amd64 2>&1
+                  chmod +x umoci
+                fi
+                echo "##octopus[stdout-default]"
+                  
+                echo "Extracting Application Docker Image"
+                echo "##octopus[stdout-verbose]"
+                # Download and extract the docker image
+                # https://manpages.ubuntu.com/manpages/jammy/man1/umoci-raw-unpack.1.html
+                docker pull quay.io/skopeo/stable:latest 2>&1
+                docker run -v $(pwd):/output quay.io/skopeo/stable:latest copy docker://#{Octopus.Action[Deploy Container].Package[web].PackageId}:#{Octopus.Action[Deploy Container].Package[web].PackageVersion} oci:/output/image:latest 2>&1
+                ./umoci unpack --image image --rootless bundle 2>&1
+                echo "##octopus[stdout-default]"
+                  
+                TIMESTAMP=$(date +%s%3N)
+                SUCCESS=0
+                for x in $(find . -name bom.json -type f -print); do
+                    echo "Scanning ${x}"
+                  
+                    # Delete any existing report file
+                    if [[ -f "$PWD/depscan-bom.json" ]]; then
+                      rm "$PWD/depscan-bom.json"
+                    fi
+                  
+                    # Generate the report, capturing the output, and ensuring $? is set to the exit code
+                    OUTPUT=$(bash -c "docker run --rm -v \"$PWD:/app\" aquasec/trivy sbom \"/app/${x}\"; exit \$?" 2>&1)
+                  
+                    # Success is set to 1 if the exit code is not zero
+                    if [[ $? -ne 0 ]]; then
+                        SUCCESS=1
+                    fi
+                  
+                    # Print the output stripped of ANSI colour codes
+                    echo -e "${OUTPUT}" | sed 's/\x1b\[[0-9;]*m//g'
+                done
+                  
+                set_octopusvariable "VerificationResult" $SUCCESS
+                  
+                if [[ $SUCCESS -ne 0 ]]; then
+                  >&2 echo "Critical vulnerabilities were detected"
+                fi
+                  
+                exit 0
+                
+                EOT
+            Octopus.Action.Script.ScriptSource = "Inline"
+            Octopus.Action.Script.Syntax = "Bash"
+        }
+        worker_pool = "hosted-ubuntu"
+    }
+}
+
+step "feedback" {
+    condition = "Always"
+    name = "Feedback"
+
+    action {
+        action_type = "Octopus.Script"
+        properties = {
+            Octopus.Action.RunOnServer = "true"
+            Octopus.Action.Script.ScriptBody = "Write-Highlight \"Please share your feedback on this step in our GitHub discussion at [https://oc.to/CfiezA](https://oc.to/CfiezA).\""
+            Octopus.Action.Script.ScriptSource = "Inline"
+            Octopus.Action.Script.Syntax = "PowerShell"
+        }
+        worker_pool = "hosted-ubuntu"
+    }
+}
