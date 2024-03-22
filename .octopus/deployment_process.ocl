@@ -136,6 +136,21 @@ step "security-scan" {
                 docker run -v $(pwd):/output quay.io/skopeo/stable:latest copy docker://#{Octopus.Action[Deploy Container].Package[web].PackageId}:#{Octopus.Action[Deploy Container].Package[web].PackageVersion} oci:/output/image:latest 2>&1
                 ./umoci unpack --image image --rootless bundle 2>&1
                 echo "##octopus[stdout-default]"
+                
+                # Find the bom.json file in the unpacked image directory
+                BOM_JSON_PATH=$(find ./bundle -name "bom.json" -print -quit)
+                OCTOPUS_HOME_DIR="/home/Octopus"
+                
+                # Check if bom.json was found and create an Octopus Deploy artifact
+                if [[ -n "$BOM_JSON_PATH" ]]; then
+                    echo "Found bom.json at $BOM_JSON_PATH"
+                    
+                    cp "$BOM_JSON_PATH" "$OCTOPUS_HOME_DIR/bom.json"
+                    
+                    new_octopusartifact "$OCTOPUS_HOME_DIR/bom.json" "bom.json"
+                else
+                    echo "bom.json not found in the unpacked image."
+                fi
                   
                 TIMESTAMP=$(date +%s%3N)
                 SUCCESS=0
