@@ -6,7 +6,6 @@ step "deploy-container" {
 
     action {
         action_type = "Octopus.KubernetesDeployContainers"
-        environments = ["development", "test", "production"]
         properties = {
             Octopus.Action.EnabledFeatures = "Octopus.Features.KubernetesService,Octopus.Features.KubernetesIngress,Octopus.Features.KubernetesConfigMap,Octopus.Features.KubernetesSecret"
             Octopus.Action.Kubernetes.DeploymentTimeout = "180"
@@ -25,7 +24,6 @@ step "deploy-container" {
             Octopus.Action.KubernetesContainers.ServiceNameType = "External"
             Octopus.Action.KubernetesContainers.ServicePorts = "[{\"name\":\"web\",\"nodePort\":\"\",\"port\":\"80\",\"protocol\":\"TCP\",\"targetPort\":\"web\"}]"
             Octopus.Action.KubernetesContainers.ServiceType = "ClusterIP"
-            Octopus.Action.RunOnServer = "true"
             OctopusUseBundledTooling = "False"
         }
         worker_pool = "hosted-ubuntu"
@@ -56,9 +54,7 @@ step "smoke-test" {
 
     action {
         action_type = "Octopus.KubernetesRunScript"
-        environments = ["development", "test", "production"]
         properties = {
-            Octopus.Action.RunOnServer = "true"
             Octopus.Action.Script.ScriptBody = <<-EOT
                 for i in {1..30}
                 do
@@ -116,7 +112,6 @@ step "security-scan" {
     action {
         action_type = "Octopus.Script"
         properties = {
-            Octopus.Action.RunOnServer = "true"
             Octopus.Action.Script.ScriptBody = <<-EOT
                 echo "Pulling Trivy Docker Image"
                 echo "##octopus[stdout-verbose]"
@@ -187,7 +182,6 @@ step "feedback" {
     action {
         action_type = "Octopus.Script"
         properties = {
-            Octopus.Action.RunOnServer = "true"
             Octopus.Action.Script.ScriptBody = "Write-Highlight \"Please share your feedback on this step in our GitHub discussion at [https://oc.to/CfiezA](https://oc.to/CfiezA).\""
             Octopus.Action.Script.ScriptSource = "Inline"
             Octopus.Action.Script.Syntax = "PowerShell"
