@@ -92,7 +92,7 @@ step "smoke-test" {
             Octopus.Action.Script.Syntax = "Bash"
             OctopusUseBundledTooling = "False"
         }
-        worker_pool = "hosted-ubuntu"
+        worker_pool = "gcp-worker-pool"
     }
 }
 
