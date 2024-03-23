@@ -44,7 +44,7 @@ step "deploy-container" {
 step "smoke-test" {
     name = "Smoke Test"
     properties = {
-        Octopus.Action.TargetRoles = "EKS_Reference_Cluster"
+        Octopus.Action.TargetRoles = "trading-platform"
     }
 
     action {
@@ -93,11 +93,6 @@ step "smoke-test" {
             OctopusUseBundledTooling = "False"
         }
         worker_pool = "hosted-ubuntu"
-
-        container {
-            feed = "docker-hub"
-            image = "octopuslabs/k8s-workertools"
-        }
     }
 }
 
@@ -181,7 +176,7 @@ step "security-scan" {
             Octopus.Action.Script.ScriptSource = "Inline"
             Octopus.Action.Script.Syntax = "Bash"
         }
-        worker_pool = "hosted-ubuntu"
+        worker_pool = "gcp-worker-pool"
     }
 }
 
