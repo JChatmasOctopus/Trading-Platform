@@ -1,7 +1,7 @@
 step "deploy-container" {
     name = "Deploy Container"
     properties = {
-        Octopus.Action.TargetRoles = "EKS_Reference_Cluster,tradingGCP"
+        Octopus.Action.TargetRoles = "trading-platform"
     }
 
     action {
@@ -26,12 +26,7 @@ step "deploy-container" {
             Octopus.Action.KubernetesContainers.ServiceType = "ClusterIP"
             OctopusUseBundledTooling = "False"
         }
-        worker_pool = "hosted-ubuntu"
-
-        container {
-            feed = "docker-hub"
-            image = "octopuslabs/k8s-workertools"
-        }
+        worker_pool = "gcp-worker-pool"
 
         packages "web" {
             acquisition_location = "NotAcquired"
