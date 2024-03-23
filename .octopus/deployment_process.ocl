@@ -1,7 +1,7 @@
 step "deploy-container" {
     name = "Deploy Container"
     properties = {
-        Octopus.Action.TargetRoles = "EKS_Reference_Cluster"
+        Octopus.Action.TargetRoles = "EKS_Reference_Cluster,tradingGCP"
     }
 
     action {
