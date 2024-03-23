@@ -34,12 +34,6 @@ variable "Kubernetes.Ingress.Name" {
     }
 }
 
-variable "Kubernetes.Ingress.Path" {
-    value "/#{Octopus.Action.Kubernetes.Namespace}(/.*)?" {
-        description = "The name of the Kubernetes ingress resource"
-    }
-}
-
 variable "Kubernetes.Service.Name" {
     value "#{Microservice.Name}" {
         description = "The name of the Kubernetes service resource"
@@ -49,5 +43,11 @@ variable "Kubernetes.Service.Name" {
 variable "Microservice.Name" {
     value "frontend" {
         description = "The microservice name, which is used as the basis for K8s resources and networking paths"
+    }
+}
+
+variable "Kubernetes.Ingress.Path" {
+    value "/default(/.*)?" {
+        description = "The name of the Kubernetes ingress resource"
     }
 }
