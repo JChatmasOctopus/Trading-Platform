@@ -53,7 +53,7 @@ step "smoke-test" {
             Octopus.Action.Script.ScriptBody = <<-EOT
                 for i in {1..30}
                 do
-                	HOSTNAME=$(kubectl get ingress #{Kubernetes.Ingress.Name} -o json -n development | jq -r '.status.loadBalancer.ingress[0].hostname')
+                	HOSTNAME=$(kubectl get ingress #{Kubernetes.Ingress.Name} -o json -n default | jq -r '.status.loadBalancer.ingress[0].hostname')
                     if [[ -n "${HOSTNAME}" ]]
                   	then
                     	break
