@@ -51,41 +51,38 @@ step "smoke-test" {
         action_type = "Octopus.KubernetesRunScript"
         properties = {
             Octopus.Action.Script.ScriptBody = <<-EOT
-                for i in {1..30}
-                do
-                	HOSTNAME=$(kubectl get ingress #{Kubernetes.Ingress.Name} -o json -n default | jq -r '.status.loadBalancer.ingress[0].hostname')
-                    if [[ -n "${HOSTNAME}" ]]
-                  	then
-                    	break
-                  	fi
-                  	echo "Waiting for ingress hostname"
-                  	sleep 10
-                done
-                    
+                kubectl get ingress --all-namespaces
                 
-                # Load balancers can take a minute or so before their DNS is propagated.
-                # A status code of 000 means curl could not resolve the DNS name, so we wait for a bit until DNS is updated.
-                echo "Testing http://${HOSTNAME}#{Kubernetes.App.HealthCheck}"
-                echo "Waiting for DNS to propagate. This can take a while for a new load balancer."
-                for i in {1..30}
-                do
-                  CODE=$(curl -o /dev/null -s -w "%{http_code}\n" http://${HOSTNAME}#{Kubernetes.App.HealthCheck})
-                  if [[ "${CODE}" == "200" ]]
-                  then
-                    break
-                  fi
-                  echo "Waiting for DNS name to be resolvable and for service to respond"
-                  sleep 10
-                done
+                kubectl get ingress audits -o json -n default
                 
-                echo "response code: ${CODE}"
-                if [[ "${CODE}" == "200" ]]
-                then
-                    echo "success"
-                    exit 0
+                SERVICE_NAME=$(get_octopusvariable "Kubernetes.Deployment.Name")
+                NAMESPACE="default" # Change this if your service is in a different namespace
+                
+                # Logging: Start checking
+                echo "Checking for service '$SERVICE_NAME' in namespace '$NAMESPACE'..."
+                
+                # Attempt to retrieve the specified service's details
+                SERVICE_DETAILS=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.metadata.name} {.spec.ports[0].port} {.status.loadBalancer.ingress[0].ip}' 2>/dev/null)
+                
+                # Check if the service was found
+                if [ -z "$SERVICE_DETAILS" ]; then
+                    echo "Service '$SERVICE_NAME' not found in namespace '$NAMESPACE'."
                 else
-                    echo "error"
-                    exit 1
+                    # Splitting service details into array to access individual elements
+                    IFS=' ' read -ra DETAILS <<< "$SERVICE_DETAILS"
+                    SERVICE_NAME_FOUND="${DETAILS[0]}"
+                    SERVICE_PORT="${DETAILS[1]}"
+                    SERVICE_EXTERNAL_IP="${DETAILS[2]}"
+                
+                    # Logging: Service found
+                    echo "Service '$SERVICE_NAME_FOUND' found."
+                    
+                    # Check if an external IP is assigned and display appropriate message
+                    if [ -z "$SERVICE_EXTERNAL_IP" ]; then
+                        echo "Service port: $SERVICE_PORT. No external IP assigned."
+                    else
+                        echo "Service port: $SERVICE_PORT. External IP: $SERVICE_EXTERNAL_IP."
+                    fi
                 fi
                 EOT
             Octopus.Action.Script.ScriptSource = "Inline"
