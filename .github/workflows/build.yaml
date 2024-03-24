@@ -1,4 +1,4 @@
-name: Build & Push Trading Platform
+name: CI - Trading Platform
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   push_to_registry:
-    name: Push Docker image to Docker Hub
+    name: Build & Push Containers
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -71,16 +71,44 @@ jobs:
           # to ensure that existing images are not overwritten unintentionally.
           push: false
           tags: jchatmas/new-name:${{ steps.determine_version.outputs.semVer }}
-
-      - name: Create Octopus Release
-        # When the image is being pushed, remove this if property to have the workflow create
-        # a new release in Octopus. Creating a release without a valid image will fail,
-        # so the image must be pushed first.
-        if: ${{ false }}
-        uses: OctopusDeploy/create-release-action@v3
-        env:
-          OCTOPUS_API_KEY: "${{ secrets.OCTOPUS_API_TOKEN }}"
-          OCTOPUS_URL: "https://demo.octopus.app"
-          OCTOPUS_SPACE: "Trading Team"
+          
+  Push-build-information:
+       
+      name: 🐙 Push Build Information
+      needs: push_to_registry 
+      runs-on: ubuntu-latest
+      
+      env:
+        OCTOPUS_URL: ${{ secrets.OCTOPUS_URL }}
+        OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
+        OCTOPUS_SPACE: ${{ secrets.OCTOPUS_SPACE }}
+      
+      steps:
+      - uses: OctopusDeploy/push-build-information-action@v3
+        name: Push Build Information
         with:
-          project: "New Name"
+          version: ${{ needs.build.outputs.version }}
+          packages: |
+            OctoPetShop.Database
+            OctoPetShop.Web
+            OctoPetShop.ProductService
+            OctoPetShop.ShoppingCartService
+    
+  Create-Octopus-Release:
+  
+      name: 🐙 Create Octopus Release
+      needs: [push_to_registry, Push-build-information]
+      runs-on: ubuntu-latest
+      
+      env:
+        OCTOPUS_URL: "https://demo.octopus.app"
+        OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_TOKEN }}
+        OCTOPUS_SPACE: "Trading Team"
+        
+      steps:
+      - uses: OctopusDeploy/create-release-action@v3
+        id: "create-release"
+        with:
+          project: "-Orchestrator-"
+      outputs: 
+       release_number: ${{ steps.create-release.outputs.release_number }}
