@@ -83,6 +83,15 @@ jobs:
       - name: Package Trading Platform
         run: |
           octo pack --id="TradingPlatform.Service" --format="Zip" --version="${{ steps.version-generator.outputs.version }}" --basePath="$GITHUB_WORKSPACE/src" --outFolder="$GITHUB_WORKSPACE/artifacts"
+
+      - name: Push Trading Platform Packages
+        uses: OctopusDeploy/push-package-action@v1.1.1
+        with:
+          api_key: ${{ secrets.OCTOPUS_API_TOKEN }}
+          server: "https://demo.octopus.app"
+          space: "Trading Team"
+          packages: |
+            artifacts/TradingPlatform.Service.${{ steps.version-generator.outputs.version }}.zip
           
   Push-build-information:
        
@@ -91,9 +100,9 @@ jobs:
       runs-on: ubuntu-latest
       
       env:
-        OCTOPUS_URL: ${{ secrets.OCTOPUS_URL }}
-        OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_KEY }}
-        OCTOPUS_SPACE: ${{ secrets.OCTOPUS_SPACE }}
+        OCTOPUS_URL: "https://demo.octopus.app"
+        OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_API_TOKEN }}
+        OCTOPUS_SPACE: "Trading Team"
       
       steps:
       - uses: OctopusDeploy/push-build-information-action@v3
