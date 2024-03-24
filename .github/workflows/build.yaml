@@ -9,11 +9,19 @@ jobs:
   push_to_registry:
     name: Build & Push Containers
     runs-on: ubuntu-latest
+
+    outputs:
+      version: ${{ steps.version-generator.outputs.version }}
+      
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
         with:
           fetch-depth: '0'
+          
+      - name: Set Version Number
+        id: version-generator
+        run: echo "version=$(date +'%Y.%m.%d').$GITHUB_RUN_NUMBER" >> $GITHUB_OUTPUT
 
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v0.9.15
