@@ -79,6 +79,10 @@ jobs:
           # to ensure that existing images are not overwritten unintentionally.
           push: false
           tags: jchatmas/new-name:${{ steps.determine_version.outputs.semVer }}
+    
+      - name: Package Trading Platform
+        run: |
+          octo pack --id="TradingPlatform.Service" --format="Zip" --version="${{ steps.version-generator.outputs.version }}" --basePath="$GITHUB_WORKSPACE/src" --outFolder="$GITHUB_WORKSPACE/artifacts"
           
   Push-build-information:
        
@@ -95,12 +99,9 @@ jobs:
       - uses: OctopusDeploy/push-build-information-action@v3
         name: Push Build Information
         with:
-          version: ${{ needs.build.outputs.version }}
+          version: ${{ needs.push_to_registry.outputs.version }}
           packages: |
-            OctoPetShop.Database
-            OctoPetShop.Web
-            OctoPetShop.ProductService
-            OctoPetShop.ShoppingCartService
+            TradingPlatform.Service
     
   Create-Octopus-Release:
   
