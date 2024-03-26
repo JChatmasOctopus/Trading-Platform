@@ -1,0 +1,89 @@
+variable "Kubernetes.App.HealthCheck" {
+    value "/#{Octopus.Action.Kubernetes.Namespace}/api/#{Microservice.Name}" {
+        description = "The path to perform a health check on."
+    }
+}
+
+variable "Kubernetes.Deployment.Feed" {
+    value "Feeds-4119" {
+        description = "The feed ID hosting the image"
+    }
+}
+
+variable "Kubernetes.Deployment.Image" {
+    value "octopussamples/octopub-products-microservice" {
+        description = "The image to deploy"
+    }
+}
+
+variable "Kubernetes.Deployment.Name" {
+    value "#{Microservice.Name}" {
+        description = "The name of the Kubernetes deployment resource"
+    }
+}
+
+variable "Kubernetes.Deployment.Port" {
+    value "8083" {
+        description = "The port exposed by the web app"
+    }
+}
+
+variable "Kubernetes.Ingress.Name" {
+    value "#{Microservice.Name}" {
+        description = "The name of the Kubernetes ingress resource"
+    }
+}
+
+variable "Kubernetes.Ingress.Path" {
+    value "/#{Octopus.Action.Kubernetes.Namespace}(/api/#{Microservice.Name})(/.*)?" {
+        description = "The path of the Kubernetes ingress resource"
+    }
+}
+
+variable "Kubernetes.Namespace" {
+    value "trading-platform-dev" {
+        environment = ["development"]
+    }
+
+    value "trading-platform-test" {
+        environment = ["test"]
+    }
+
+    value "trading-platform-uat" {
+        environment = ["uat"]
+    }
+
+    value "trading-platform" {
+        environment = ["production"]
+    }
+}
+
+variable "Kubernetes.Service.Name" {
+    value "#{Microservice.Name}" {
+        description = "The name of the Kubernetes service resource"
+    }
+}
+
+variable "Microservice.Base.Path" {
+    value "/#{Microservice.Name}" {
+        environment = ["production"]
+    }
+
+    value "/dev-#{Microservice.Name}" {
+        environment = ["development"]
+    }
+
+    value "/test-#{Microservice.Name}" {
+        environment = ["test"]
+    }
+
+    value "/uat-#{Microservice.Name}" {
+        environment = ["uat"]
+    }
+}
+
+variable "Microservice.Name" {
+    value "products" {
+        description = "The microservice name, which is used as the basis for K8s resources and networking paths"
+    }
+}
